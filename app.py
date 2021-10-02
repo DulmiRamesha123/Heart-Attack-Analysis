@@ -48,9 +48,9 @@ def predict():
     output = round(prediction[0], 2)
     print(output)
     if output == 0:
-        return render_template('index.html', prediction_text='THE PATIENT IS NOT LIKELY TO HAVE A HEART FAILURE'.format(output))
+        return render_template('index.html', prediction_text='THE PATIENT HAS A LOW RISK OF HEART ATTACK'.format(output))
     else:
-         return render_template('index.html', prediction_text='THE PATIENT IS LIKELY TO HAVE A HEART FAILURE')
+         return render_template('index.html', prediction_text='THE PATIENT HAS A HIGH RISK OF HEART ATTACK')
 
 
 

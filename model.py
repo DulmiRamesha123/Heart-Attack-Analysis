@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[64]:
-
-
 import numpy as np
 import pandas as pd
 
@@ -31,25 +25,23 @@ import warnings
 import re
 warnings.filterwarnings('ignore')
 
-get_ipython().run_line_magic('matplotlib', 'inline')
+import pickle
 
+# get_ipython().run_line_magic('matplotlib', 'inline')
 
-# In[65]:
+#importdata
+data = pd.read_csv('heart.csv')
 
-
-def importdata():
-    data = pd.read_csv('heart.csv')
+print("Dataset : \n", data.head())
+print("")
+print ("Dataset Shape : ", data.shape)
+print("")
+data.info()
+print("")
     
-    print("Dataset : \n", data.head())
-    print("")
-    print ("Dataset Shape : ", data.shape)
-    print("")
-    data.info()
-    print("")
-    
-    #check for null values
-    print("Check for null values : \n", data.isnull().sum())
-    print("")
+#check for null values
+print("Check for null values : \n", data.isnull().sum())
+print("")
     
     #check for unique values of the attributes
     #print("unique values of gender :", data.sex.unique())
@@ -62,124 +54,82 @@ def importdata():
     #print("unique values of thall :", data.thall.unique())
     #print("")
     
-    #pairwise correlation
-    print("Pairwise correlation : \n", data.corr())
-    print("")
-    
-    return data
 
 
-# In[66]:
-
+#pairwise correlation
+print("Pairwise correlation : \n", data.corr())
+print("")
 
 #split dataset in to train data and test data
-def splitdataset(data):
-    # Separating the target variable
-    X,Y = data[['age', 'sex', 'cp', 'trtbps', 'chol', 'fbs', 'restecg', 'thalachh',
-       'exng', 'oldpeak', 'slp', 'caa', 'thall']], data[['output']]
+
+# Separating the target variable
+X,Y = data[['age', 'sex', 'cp', 'trtbps', 'chol', 'fbs', 'restecg', 'thalachh',
+            'exng', 'oldpeak', 'slp', 'caa', 'thall']], data[['output']]
     
-    # Splitting the dataset into train and test
-    X_train, X_test, Y_train, Y_test = train_test_split(X,Y, test_size=.33, random_state=42)
-    
-    return X, Y, X_train, X_test, Y_train, Y_test
-
-
-# In[67]:
-
+# Splitting the dataset into train and test
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y, test_size=.33, random_state=42)
 
 #train model using gini index
-def train_using_gini(X_train, X_test, Y_train):
-    tree = DecisionTreeClassifier(criterion = "gini", random_state = 35, max_depth=3, min_samples_leaf=2, 
+
+tree = DecisionTreeClassifier(criterion = "gini", random_state = 35, max_depth=3, min_samples_leaf=2, 
                                   splitter="random", min_samples_split=5, max_features=None, max_leaf_nodes=None)
-    tree.fit(X_train, Y_train)
-    return tree
-
-
-# In[68]:
-
+tree.fit(X_train, Y_train)
 
 #model reuslts prediction
-def prediction(X_test, tree):
-    predicted = tree.predict(X_test)
-    return predicted
-
-
-# In[69]:
-
+predicted = tree.predict(X_test)
 
 #calculate accuracy and show confusion matrix + accuracy report
-def cal_accuracy(X_test, Y_test, predicted, tree):
-    predicted=predicted.reshape(100,1)
+
+predicted=predicted.reshape(100,1)
     
-    #accracy
-    error = abs(predicted - Y_test)
-    errorMean = round(np.mean(error),2)
-    #ac = 1-round(np.mean(error),2)
-    print("error mean : ", errorMean)
-    print("")
+#accracy
+error = abs(predicted - Y_test)
+errorMean = round(np.mean(error),2)
+#ac = 1-round(np.mean(error),2)
+print("error mean : ", errorMean)
+print("")
     
-    #confusion matrix
-    cm = confusion_matrix(Y_test, predicted)
-    print("confusion matrix : \n", cm)
+#confusion matrix
+cm = confusion_matrix(Y_test, predicted)
+print("confusion matrix : \n", cm)
+
+#plot confusion matrix
+plt.clf()
+plt.imshow(cm, interpolation='nearest', cmap = plt.cm.Wistia)
+classNames = ['Negative', 'Positive']
+plt.title('Confusion Matrix - Test Data')
+plt.ylabel('Actual label')
+plt.xlabel('Predicted label')
+tick_marks = np.arange(len(classNames))
+plt.xticks(tick_marks, classNames, rotation = 45)
+plt.yticks(tick_marks, classNames)
+s = [['TN','FP'], ['FN','TP']]
+for i in range(2):
+    for j in range(2):
+        plt.text(j,i, str(s[i][j])+ " = "+str(cm[i][j]))
+plt.show()
     
-    #plot confusion matrix
-    plt.clf()
-    plt.imshow(cm, interpolation='nearest', cmap = plt.cm.Wistia)
-    classNames = ['Negative', 'Positive']
-    plt.title('Confusion Matrix - Test Data')
-    plt.ylabel('Actual label')
-    plt.xlabel('Predicted label')
-    tick_marks = np.arange(len(classNames))
-    plt.xticks(tick_marks, classNames, rotation = 45)
-    plt.yticks(tick_marks, classNames)
-    s = [['TN','FP'], ['FN','TP']]
-    for i in range(2):
-        for j in range(2):
-            plt.text(j,i, str(s[i][j])+ " = "+str(cm[i][j]))
-    plotCm = plt.show()
+#prediction probability
+predicted_prob = tree.predict_proba(X_test)[:,1]
     
-    #prediction probability
-    predicted_prob = tree.predict_proba(X_test)[:,1]
+# Accuray report AUC
+accuracy = metrics.accuracy_score(Y_test, predicted)
+auc = metrics.roc_auc_score(Y_test, predicted_prob)
+print("Accuracy (overall correct predictions):",  round(accuracy,2))
+print("Auc:", round(auc,2))
+
+# Precision e Recall
+recall = metrics.recall_score(Y_test, predicted)
+precision = metrics.precision_score(Y_test, predicted)
+F1_score = metrics.f1_score(Y_test, predicted)
+print("Recall (all 1s predicted right):", round(recall,2))
+print("Precision (confidence when predicting a 1):", round(precision,2))
+print("F1 score :", round(F1_score,2))
+print("Detail:")
+print(metrics.classification_report(Y_test, predicted, target_names=[str(i) for i in np.unique(Y_test)]))
+
+#generate the pickel file
+pickle.dump(tree, open('model.pkl','wb'))
+model = pickle.load(open('model.pkl','rb'))
+
     
-    # Accuray report AUC
-    accuracy = metrics.accuracy_score(Y_test, predicted)
-    auc = metrics.roc_auc_score(Y_test, predicted_prob)
-    print("Accuracy (overall correct predictions):",  round(accuracy,2))
-    print("Auc:", round(auc,2))
-    
-    # Precision e Recall
-    recall = metrics.recall_score(Y_test, predicted)
-    precision = metrics.precision_score(Y_test, predicted)
-    F1_score = metrics.f1_score(Y_test, predicted)
-    print("Recall (all 1s predicted right):", round(recall,2))
-    print("Precision (confidence when predicting a 1):", round(precision,2))
-    print("F1 score :", round(F1_score,2))
-    print("Detail:")
-    print(metrics.classification_report(Y_test, predicted, target_names=[str(i) for i in np.unique(Y_test)]))
-    
-    return
-
-
-# In[70]:
-
-
-#Function main
-def main():
-    # Building Phase
-    data = importdata()
-    X, Y, X_train, X_test, Y_train, Y_test = splitdataset(data)
-    tree = train_using_gini(X_train, X_test, Y_train)
-    
-    tree_prediction = prediction(X_test, tree)
-    cal_accuracy(X_test, Y_test, tree_prediction, tree)
-    
-# Calling main function
-if __name__=="__main__":
-    main()
-
-
-# In[ ]:
-
-
-
-
