@@ -1,1 +1,8 @@
 # Heart-Attack-Analysis
+
+ The dataset Heart Attack Analysis & Prediction Dataset is downloaded from Kaggle. The dataset approximately contains 4560 records (rows * columns). This dataset describes all the medical details of the patients who had faced a heart attack situation. The dataset contains both categorical data and continuous data. There are fifteen columns contains fifteen attributes which describe the medical situation of the patient.
+Prediction column returns two exact outputs, predicting whether the specific patient has a less chance or more chance of heart attack in the future. The chance of having heart attack for a given patient is dependent only on the given detailed attributes of that patient’s medical details. The given attributes related to each other as well as the predicting decision.
+Using this dataset, we create a classification model applying tree induction algorithm to predict the chance of heart attack for a new patient. From that we can successfully identify the patients who are having high risk of heart attack and it will help medical personals to identify risky heart patients early and can start those patients’ treatments early to bring the risk of heart attack to a lower level.
+Identified problem :- A health care organization is in need of an efficient way to accurately analyze the risk level of having heart attack of their patients based on the patient’s medical details.
+Solution :- Build a classification model applying tree induction algorithm to analyze the prediction of the risk of having heart attack of a new patient based on their medical details.
+Dataset Link :- https://www.kaggle.com/rashikrahmanpritom/heart-attack-analysis-prediction-dataset?select=heart.csv
